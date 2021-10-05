@@ -31,7 +31,7 @@ uint8_t Velocity = 0;
 uint8_t KEY = 0;
 
 int main(void) {
-	//hello! hi!
+
 	HAL_Init();
 	SystemClock_Config();
 	MX_USB_DEVICE_Init();
@@ -64,43 +64,52 @@ int main(void) {
 
 	while (1) {
 
-		if (sys_tick - tim > 0) {
-
-			buu = dma_buf[16];
-
-			if (buu == 254) {
-				TurnLedOn();
-			} else {
-				TurnLedOff();
-			}
-
-
-
-			if (buu == 254 && onx == 0 && ony == 0) {
-				onx = 1;
-				Txx = sys_tick;
-			}
-
-			if (buu == 252 && onx == 1 && ony == 0) {
-				ony = 1;
-				Tyy = sys_tick;
-				Tzz = Tyy - Txx;
-
-				if (Tzz < 12000) {
-				Velocity = SPEEDTABLE[Tzz];
-				USBD_AddNoteOn(0, 1, 60, Velocity);
-				USBD_SendMidiMessages();
-				}
-			}
-
-			if (buu == 255 && onx == 1 && ony == 1) {
-				onx = 0;
-				ony = 0;
-				USBD_AddNoteOff(0, 1, 60);
-				USBD_SendMidiMessages();
-			}
-			tim = sys_tick;
+		if (dma_buf[16] == 254) {
+			TurnLedOn();
+		} else {
+			TurnLedOff();
 		}
+
+
+
+
+//		if (sys_tick - tim > 0) {
+//
+//			buu = dma_buf[16];
+//
+//			if (buu == 254) {
+//				TurnLedOn();
+//			} else {
+//				TurnLedOff();
+//			}
+//
+//
+//
+//			if (buu == 254 && onx == 0 && ony == 0) {
+//				onx = 1;
+//				Txx = sys_tick;
+//			}
+//
+//			if (buu == 252 && onx == 1 && ony == 0) {
+//				ony = 1;
+//				Tyy = sys_tick;
+//				Tzz = Tyy - Txx;
+//
+//				if (Tzz < 12000) {
+//				Velocity = SPEEDTABLE[Tzz];
+//				USBD_AddNoteOn(0, 1, 60, Velocity);
+//				USBD_SendMidiMessages();
+//				}
+//			}
+//
+//			if (buu == 255 && onx == 1 && ony == 1) {
+//				onx = 0;
+//				ony = 0;
+//				USBD_AddNoteOff(0, 1, 60);
+//				USBD_SendMidiMessages();
+//			}
+//			tim = sys_tick;
+//		}
 	}
 
 
