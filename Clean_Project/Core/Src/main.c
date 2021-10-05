@@ -65,9 +65,11 @@ int main(void) {
 	while (1) {
 
 		if (dma_buf[16] == 254) {
-			TurnLedOn();
+			//TurnLedOn();
+			GPIOC->BSRR |= 0x20000000;
 		} else {
-			TurnLedOff();
+			//TurnLedOff();
+			GPIOC->BSRR |= 0x80000;
 		}
 
 
