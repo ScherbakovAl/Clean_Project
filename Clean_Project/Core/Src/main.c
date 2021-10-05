@@ -69,7 +69,7 @@ int main(void) {
 			GPIOC->BSRR |= 0x20000000;
 		} else {
 			//TurnLedOff();
-			GPIOC->BSRR |= 0x80000;
+			GPIOC->BSRR |= 0x2000;
 		}
 
 

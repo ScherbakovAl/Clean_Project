@@ -1369,11 +1369,11 @@ int main(void) {
  8000ebe:	e7f3      	b.n	8000ea8 <main+0xe8>
 		} else {
 			//TurnLedOff();
-			GPIOC->BSRR |= 0x80000;
+			GPIOC->BSRR |= 0x2000;
  8000ec0:	4b12      	ldr	r3, [pc, #72]	; (8000f0c <main+0x14c>)
  8000ec2:	691b      	ldr	r3, [r3, #16]
  8000ec4:	4a11      	ldr	r2, [pc, #68]	; (8000f0c <main+0x14c>)
- 8000ec6:	f443 2300 	orr.w	r3, r3, #524288	; 0x80000
+ 8000ec6:	f443 5300 	orr.w	r3, r3, #8192	; 0x2000
  8000eca:	6113      	str	r3, [r2, #16]
 		if (dma_buf[16] == 254) {
  8000ecc:	e7ec      	b.n	8000ea8 <main+0xe8>
