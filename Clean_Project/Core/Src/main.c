@@ -31,7 +31,7 @@ uint8_t Velocity = 0;
 uint8_t KEY = 0;
 
 int main(void) {
-	//hello!
+	//hello! hi!
 	HAL_Init();
 	SystemClock_Config();
 	MX_USB_DEVICE_Init();
