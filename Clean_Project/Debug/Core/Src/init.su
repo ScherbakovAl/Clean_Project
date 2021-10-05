@@ -1,0 +1,4 @@
+core_cm3.h:1511:22:__NVIC_EnableIRQ	16	static
+init.c:11:6:InitRcc	4	static
+init.c:30:6:InitInterrupt	8	static
+init.c:35:6:InitGpio	8	static

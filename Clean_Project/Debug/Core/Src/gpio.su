@@ -1,0 +1,7 @@
+gpio.c:7:6:SetGpioMode	24	static
+gpio.c:14:6:GetPinState	16	static
+gpio.c:18:6:SetPin	16	static
+gpio.c:22:6:ResetPin	16	static
+gpio.c:26:6:TogglePin	16	static
+gpio.c:33:6:SetMulPin	16	static
+gpio.c:37:6:ResetMulPin	16	static
