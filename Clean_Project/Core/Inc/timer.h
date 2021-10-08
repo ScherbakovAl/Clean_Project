@@ -6,8 +6,8 @@
 
 // CPU and SysTick timer frequency
 #define F_CPU 		            72000000UL      // 72MHz
-// every 1 ms
-#define SYS_TIMER_TICK  	    (F_CPU/12000-1)  // 12kHz
+// every 0.1 ms
+#define SYS_TIMER_TICK  	    (F_CPU/10000-1)  // 10000 Hz
 
 // Ticks
 extern volatile uint32_t sys_tick;

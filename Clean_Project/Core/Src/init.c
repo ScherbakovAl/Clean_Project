@@ -57,5 +57,5 @@ void InitGpio(void)
 
     // Debug LED
     SetGpioMode(LED_PIN, PIN_MODE_10MHZ_OPP);
-
+    SetGpioMode(GPIOC, 14, PIN_MODE_10MHZ_OPP);		// for test
 }

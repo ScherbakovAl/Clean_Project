@@ -18,17 +18,13 @@ SystemClock_Config(void);
 volatile uint8_t dma_buf[DMA_NUM_OF_TRANSACTIONS];
 bool data_updated;
 
-uint8_t buu = 0;
-uint32_t tim = 0;
-
 uint32_t Txx = 0;
 uint32_t Tyy = 0;
 uint32_t Tzz = 0;
-uint8_t SPEEDTABLE[12000] = { };
-uint8_t onx = 0;
-uint8_t ony = 0;
+uint8_t SPEEDTABLE[180] = { };
+uint8_t on = 0;
 uint8_t Velocity = 0;
-uint8_t KEY = 0;
+//uint8_t KEY = 0;
 
 int main(void) {
 
@@ -51,67 +47,54 @@ int main(void) {
 	InitTim3();
 	InitTim2();
 
-
 	TurnLedOn();
-	for (uint32_t ti = 0; ti < 12000; ti++) {
-		//float m = -0.01260126 * ti + 127.0126;
-		//float m = 0.8379653 + 126.2461 / pow (2,(ti / 1041.046));
-		float m = -14717.48 + ((12546.6 - (-14717.48)) / (1 + pow((ti / 156.281),0.7699161)));
+
+	for (uint32_t ti = 2; ti < 180; ti++) {
+		// e = 2.7182818284
+		// Curve: (exponential)
+		// 180 -- 1
+		// 170 -- 3
+		// 2   -- 127
+		float m = 185.2143 - (5.287731 / 0.02804114) * (1 - pow (2.7182818284, (-0.02804114 * ti)));
 		SPEEDTABLE[ti] = m;
 	}
+
 	TurnLedOff();
-	tim = sys_tick;
 
 	while (1) {
 
-		if (dma_buf[16] == 254) {
-			//TurnLedOn();
-			GPIOC->BSRR |= 0x20000000;
-		} else {
-			//TurnLedOff();
-			GPIOC->BSRR |= 0x2000;
+//		if (dma_buf[17] == 254) {
+//			GPIOC->BSRR |= 0x20000000;
+//		} else {
+//			GPIOC->BSRR |= 0x2000;
+//		}
+//
+//		if (dma_buf[17] == 252) {
+//			GPIOC->BSRR |= 0x40000000;
+//		} else {
+//			GPIOC->BSRR |= 0x4000;
+//		}
+
+
+		if (dma_buf[17] == 254 && ((sys_tick - Tyy) > 200) && on == 0) {
+			Txx = sys_tick;
+			on = 1;
 		}
 
+		if (dma_buf[17] == 252 && ((sys_tick - Txx) > 2)
+				&& ((sys_tick - Txx) < 180) && on == 1) {
+			Tyy = sys_tick;
+			on = 0;
+			Tzz = Tyy - Txx;
+			Velocity = SPEEDTABLE[Tzz];
+			USBD_AddNoteOn(0, 1, 60, Velocity);
+			USBD_AddNoteOff(0, 1, 60);
+			USBD_SendMidiMessages();
+		}
 
-
-
-//		if (sys_tick - tim > 0) {
-//
-//			buu = dma_buf[16];
-//
-//			if (buu == 254) {
-//				TurnLedOn();
-//			} else {
-//				TurnLedOff();
-//			}
-//
-//
-//
-//			if (buu == 254 && onx == 0 && ony == 0) {
-//				onx = 1;
-//				Txx = sys_tick;
-//			}
-//
-//			if (buu == 252 && onx == 1 && ony == 0) {
-//				ony = 1;
-//				Tyy = sys_tick;
-//				Tzz = Tyy - Txx;
-//
-//				if (Tzz < 12000) {
-//				Velocity = SPEEDTABLE[Tzz];
-//				USBD_AddNoteOn(0, 1, 60, Velocity);
-//				USBD_SendMidiMessages();
-//				}
-//			}
-//
-//			if (buu == 255 && onx == 1 && ony == 1) {
-//				onx = 0;
-//				ony = 0;
-//				USBD_AddNoteOff(0, 1, 60);
-//				USBD_SendMidiMessages();
-//			}
-//			tim = sys_tick;
-//		}
+		if (dma_buf[17] == 255 && ((sys_tick - Tyy) > 215)) {
+			on = 0;
+		}
 	}
 
 
@@ -135,13 +118,6 @@ int main(void) {
 
 
 
-
-
-
-//		USBD_AddNoteOn(0, 1, 60, 60);
-//		USBD_AddNoteOff(0, 1, 55);
-//		USBD_SendMidiMessages();
-//		HAL_Delay(200);
 
 }
 
