@@ -7,3 +7,4 @@ learning to program in C and work with git
 
 
 Together with https://github.com/brrastak/midi_controller_code
+with a lot of help and support
