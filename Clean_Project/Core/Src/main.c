@@ -51,7 +51,8 @@ int main(void) {
 	for (uint16_t ti = 2; ti < 720; ti++) {
 
 		// Curve: ()
-		float m = (127.2957362874146 * pow(ti, 0)) - ((0.29590363865599034) * pow(ti, 1)) + (1.673512414060542E-4 * pow(ti, 2));
+		float m = (127.2957362874146 * pow(ti, 0)) - (0.29590363865599034 * pow(ti, 1))
+				+ (1.673512414060542E-4 * pow(ti, 2));
 		SPEEDTABLE[ti] = m;
 	}
 
@@ -75,13 +76,14 @@ int main(void) {
 
 		for (KEY = 0; KEY < 48; KEY++) {
 			for (int i = 0; i < 8; i += 2) {
-				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800 && on[KEY] == 0) {
+				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800
+						&& on[KEY] == 0) {
 					Txx[KEY] = sys_tick;
 					on[KEY] = 1;
 				}
 
-				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) == 0 && (sys_tick - Txx[KEY]) > 1 && (sys_tick - Txx[KEY]) < 720
-						&& on[KEY] == 1) {
+				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) == 0 && (sys_tick - Txx[KEY]) > 1
+						&& (sys_tick - Txx[KEY]) < 720 && on[KEY] == 1) {
 					Tyy[KEY] = sys_tick;
 					on[KEY] = 0;
 					USBD_AddNoteOn(0, 1, KEY + 30, SPEEDTABLE[Tyy[KEY] - Txx[KEY]]);
