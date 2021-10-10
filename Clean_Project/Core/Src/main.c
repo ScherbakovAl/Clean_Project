@@ -50,9 +50,13 @@ int main(void) {
 
 	for (uint16_t ti = 2; ti < 720; ti++) {
 
-		// Curve: ()
-		float m = (127.2957362874146 * pow(ti, 0)) - (0.29590363865599034 * pow(ti, 1))
-				+ (1.673512414060542E-4 * pow(ti, 2));
+		// Curve: (polynomial fitting degree 2)
+		//	1		127
+		//	600		5
+		//	720		1
+
+		float m = (127.3458197598687 * pow(ti, 0)) - (0.34605667148848934 * pow(ti, 1))
+				+ (2.3691161981451332E-4 * pow(ti, 2));
 		SPEEDTABLE[ti] = m;
 	}
 
@@ -75,7 +79,7 @@ int main(void) {
 //		}
 
 		for (KEY = 0; KEY < 48; KEY++) {
-			for (int i = 0; i < 8; i += 2) {
+//			for (int i = 0; i < 8; i += 2) {
 				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800
 						&& on[KEY] == 0) {
 					Txx[KEY] = sys_tick;
@@ -94,11 +98,11 @@ int main(void) {
 				if ((dma_buf[KEY] & (1 << 0)) != 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800) {
 					on[KEY] = 0;
 				}
-			}
+//			}
 		}
 
-		GPIOC->BSRR |= 0x20000000;
-		GPIOC->BSRR |= 0x2000;
+//		GPIOC->BSRR |= 0x20000000;
+//		GPIOC->BSRR |= 0x2000;
 
 	}
 
