@@ -18,13 +18,12 @@ SystemClock_Config(void);
 volatile uint8_t dma_buf[DMA_NUM_OF_TRANSACTIONS];
 bool data_updated;
 
-uint32_t Txx = 0;
-uint32_t Tyy = 0;
+uint32_t Txx[88] = { };
+uint32_t Tyy[88] = { };
 uint32_t Tzz = 0;
-uint8_t SPEEDTABLE[180] = { };
-uint8_t on = 0;
-uint8_t Velocity = 0;
-//uint8_t KEY = 0;
+uint16_t SPEEDTABLE[720] = { };
+uint8_t on[88] = { };
+uint8_t KEY = 0;
 
 int main(void) {
 
@@ -49,75 +48,57 @@ int main(void) {
 
 	TurnLedOn();
 
-	for (uint32_t ti = 2; ti < 180; ti++) {
-		// e = 2.7182818284
-		// Curve: (exponential)
-		// 180 -- 1
-		// 170 -- 3
-		// 2   -- 127
-		float m = 185.2143 - (5.287731 / 0.02804114) * (1 - pow (2.7182818284, (-0.02804114 * ti)));
+	for (uint16_t ti = 2; ti < 720; ti++) {
+
+		// Curve: ()
+		float m = (127.2957362874146 * pow(ti, 0)) - ((0.29590363865599034) * pow(ti, 1)) + (1.673512414060542E-4 * pow(ti, 2));
 		SPEEDTABLE[ti] = m;
 	}
+
+	SPEEDTABLE[1] = 127;
 
 	TurnLedOff();
 
 	while (1) {
 
-//		if (dma_buf[17] == 254) {
+//		if ((dma_buf[17] & (1<<0)) == 0) {
 //			GPIOC->BSRR |= 0x20000000;
 //		} else {
 //			GPIOC->BSRR |= 0x2000;
 //		}
 //
-//		if (dma_buf[17] == 252) {
+//		if ((dma_buf[17] & (1<<1)) == 0) {
 //			GPIOC->BSRR |= 0x40000000;
 //		} else {
 //			GPIOC->BSRR |= 0x4000;
 //		}
 
+		for (KEY = 0; KEY < 48; KEY++) {
+			for (int i = 0; i < 8; i += 2) {
+				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800 && on[KEY] == 0) {
+					Txx[KEY] = sys_tick;
+					on[KEY] = 1;
+				}
 
-		if (dma_buf[17] == 254 && ((sys_tick - Tyy) > 200) && on == 0) {
-			Txx = sys_tick;
-			on = 1;
+				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) == 0 && (sys_tick - Txx[KEY]) > 1 && (sys_tick - Txx[KEY]) < 720
+						&& on[KEY] == 1) {
+					Tyy[KEY] = sys_tick;
+					on[KEY] = 0;
+					USBD_AddNoteOn(0, 1, KEY + 30, SPEEDTABLE[Tyy[KEY] - Txx[KEY]]);
+					USBD_AddNoteOff(0, 1, KEY + 30);
+					USBD_SendMidiMessages();
+				}
+
+				if ((dma_buf[KEY] & (1 << 0)) != 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800) {
+					on[KEY] = 0;
+				}
+			}
 		}
 
-		if (dma_buf[17] == 252 && ((sys_tick - Txx) > 2)
-				&& ((sys_tick - Txx) < 180) && on == 1) {
-			Tyy = sys_tick;
-			on = 0;
-			Tzz = Tyy - Txx;
-			Velocity = SPEEDTABLE[Tzz];
-			USBD_AddNoteOn(0, 1, 60, Velocity);
-			USBD_AddNoteOff(0, 1, 60);
-			USBD_SendMidiMessages();
-		}
+		GPIOC->BSRR |= 0x20000000;
+		GPIOC->BSRR |= 0x2000;
 
-		if (dma_buf[17] == 255 && ((sys_tick - Tyy) > 215)) {
-			on = 0;
-		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 
@@ -137,8 +118,7 @@ void SystemClock_Config(void) {
 		Error_Handler();
 	}
 
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;

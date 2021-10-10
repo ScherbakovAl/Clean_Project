@@ -24,6 +24,8 @@ uint8_t tmp_buf[DMA_NUM_OF_TRANSACTIONS];
 // Interrupt handler
 void DMA1_Channel3_IRQHandler()
 {
+	//GPIOC->BSRR |= 0x40000000;		//*********
+
     // Clear interrupt flag
     DMA1->IFCR |= DMA_IFCR_CTCIF3;
     
@@ -32,6 +34,8 @@ void DMA1_Channel3_IRQHandler()
         buf_ptr[i] = tmp_buf[i];
     *upd_flag_ptr = true;
     
+    //GPIOC->BSRR |= 0x4000;			//*********
+
 }
 void InitDma(uint8_t * buf, bool* upd_flag)
 {

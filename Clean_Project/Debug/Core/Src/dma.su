@@ -1,2 +1,2 @@
 dma.c:25:6:DMA1_Channel3_IRQHandler	16	static
-dma.c:36:6:InitDma	16	static
+dma.c:40:6:InitDma	16	static
