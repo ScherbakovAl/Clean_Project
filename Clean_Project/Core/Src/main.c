@@ -126,7 +126,7 @@ int main(void) {
 							txx[key] = sys_tick;
 							on[key] = 1;
 						}
-					} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
+					} else if ((dma_buf[key_dma[key][0]] & 4 << key_dma[key][2]) == 0) {
 						if (sys_tick - txx[key] > 1 && sys_tick - txx[key] < 720) {
 							tyy[key] = sys_tick;
 							USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
