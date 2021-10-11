@@ -18,12 +18,13 @@ SystemClock_Config(void);
 volatile uint8_t dma_buf[DMA_NUM_OF_TRANSACTIONS];
 bool data_updated;
 
-uint32_t Txx[88] = { };
-uint32_t Tyy[88] = { };
-uint32_t Tzz = 0;
-uint16_t SPEEDTABLE[720] = { };
+uint32_t txx[88] = { };
+uint32_t tyy[88] = { };
+uint32_t tzz = 0;
+uint16_t speed_table[720] = { };
 uint8_t on[88] = { };
-uint8_t KEY = 0;
+uint8_t key = 0;
+uint8_t key_dma[88][3] = { };
 
 int main(void) {
 
@@ -48,19 +49,29 @@ int main(void) {
 
 	TurnLedOn();
 
-	for (uint16_t ti = 2; ti < 720; ti++) {
+	for (uint16_t cu = 2; cu < 720; cu++) {
 
 		// Curve: (polynomial fitting degree 2)
 		//	1		127
-		//	600		5
+		//	600		4
 		//	720		1
 
-		float m = (127.3458197598687 * pow(ti, 0)) - (0.34605667148848934 * pow(ti, 1))
-				+ (2.3691161981451332E-4 * pow(ti, 2));
-		SPEEDTABLE[ti] = m;
+		float m = (127.35583645435952 * pow(cu, 0)) - (0.35608727805498913 * pow(cu, 1))
+				+ (2.5082369544962051E-4 * pow(cu, 2));
+		speed_table[cu] = m;
 	}
+	speed_table[1] = 127;
 
-	SPEEDTABLE[1] = 127;
+	int bi = 0;
+	for (uint8_t ke = 0; ke < 88; ke++) {
+		key_dma[ke][0] = ke / 4;
+		key_dma[ke][1] = bi;
+		key_dma[ke][2] = bi + 1;
+		bi += 2;
+		if (bi > 7) {
+			bi = 0;
+		}
+	}
 
 	TurnLedOff();
 
@@ -78,34 +89,60 @@ int main(void) {
 //			GPIOC->BSRR |= 0x4000;
 //		}
 
-		for (KEY = 0; KEY < 48; KEY++) {
-//			for (int i = 0; i < 8; i += 2) {
-				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800
-						&& on[KEY] == 0) {
-					Txx[KEY] = sys_tick;
-					on[KEY] = 1;
-				}
+//		for (KEY = 0; KEY < 48; KEY++) {
+////			for (int i = 0; i < 8; i += 2) {
+//				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 1000
+//						&& on[KEY] == 0) {
+//					Txx[KEY] = sys_tick;
+//					on[KEY] = 1;
+//				}
+//
+//				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) == 0 && (sys_tick - Txx[KEY]) > 1
+//						&& (sys_tick - Txx[KEY]) < 720 && on[KEY] == 1) {
+//					Tyy[KEY] = sys_tick;
+//					on[KEY] = 0;
+//					USBD_AddNoteOn(0, 1, KEY + 30, SPEEDTABLE[Tyy[KEY] - Txx[KEY]]);
+//					USBD_AddNoteOff(0, 1, KEY + 30);
+//					USBD_SendMidiMessages();
+//				}
+//
+//				if ((dma_buf[KEY] & (1 << 0)) != 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 1000) {
+//					on[KEY] = 0;
+//				}
+////			}
+//		}
 
-				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) == 0 && (sys_tick - Txx[KEY]) > 1
-						&& (sys_tick - Txx[KEY]) < 720 && on[KEY] == 1) {
-					Tyy[KEY] = sys_tick;
-					on[KEY] = 0;
-					USBD_AddNoteOn(0, 1, KEY + 30, SPEEDTABLE[Tyy[KEY] - Txx[KEY]]);
-					USBD_AddNoteOff(0, 1, KEY + 30);
-					USBD_SendMidiMessages();
-				}
+//		// в key_dma	[]			[]
+//		//				нота
+//									номер dma_buf
+//									бит1
+//									бит2
 
-				if ((dma_buf[KEY] & (1 << 0)) != 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 800) {
-					on[KEY] = 0;
+		for (key = 0; key < 88; key++) {
+			if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][1]) == 0) {
+				if (on[key] == 0) {
+					if (sys_tick - tyy[key] > 1000) {
+						txx[key] = sys_tick;
+						on[key] = 1;
+					}
+				} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
+					if (sys_tick - txx[key] > 1 && sys_tick - txx[key] < 720) {
+						tyy[key] = sys_tick;
+						USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
+						USBD_AddNoteOff(0, 1, key + 21);
+						USBD_SendMidiMessages();
+						on[key] = 0;
+					}
 				}
-//			}
+			} else if (on[key] == 1) {
+				if (sys_tick - tyy[key] > 1000) {
+					on[key] = 0;
+				}
+			}
 		}
-
 //		GPIOC->BSRR |= 0x20000000;
 //		GPIOC->BSRR |= 0x2000;
-
 	}
-
 }
 
 void SystemClock_Config(void) {
