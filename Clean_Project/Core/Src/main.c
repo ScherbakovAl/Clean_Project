@@ -43,7 +43,8 @@ int main(void) {
 	delay_ms(1);
 
 	InitInterrupt();
-	InitDma((uint8_t*) dma_buf, &data_updated);
+	//InitDma((uint8_t*) dma_buf, &data_updated);
+	InitDma((uint8_t*) dma_buf);
 	InitTim3();
 	InitTim2();
 
@@ -117,31 +118,32 @@ int main(void) {
 //									номер dma_buf
 //									бит1
 //									бит2
-
-		for (key = 0; key < 88; key++) {
-			if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][1]) == 0) {
-				if (on[key] == 0) {
-					if (sys_tick - tyy[key] > 1000) {
-						txx[key] = sys_tick;
-						on[key] = 1;
+		if (IsDataReady()) {
+			for (key = 0; key < 88; key++) {
+				if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][1]) == 0) {
+					if (on[key] == 0) {
+						if (sys_tick - tyy[key] > 1000) {
+							txx[key] = sys_tick;
+							on[key] = 1;
+						}
+					} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
+						if (sys_tick - txx[key] > 1 && sys_tick - txx[key] < 720) {
+							tyy[key] = sys_tick;
+							USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
+							USBD_AddNoteOff(0, 1, key + 21);
+							USBD_SendMidiMessages();
+							on[key] = 0;
+						}
 					}
-				} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
-					if (sys_tick - txx[key] > 1 && sys_tick - txx[key] < 720) {
-						tyy[key] = sys_tick;
-						USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
-						USBD_AddNoteOff(0, 1, key + 21);
-						USBD_SendMidiMessages();
+				} else if (on[key] == 1) {
+					if (sys_tick - tyy[key] > 1000) {
 						on[key] = 0;
 					}
 				}
-			} else if (on[key] == 1) {
-				if (sys_tick - tyy[key] > 1000) {
-					on[key] = 0;
-				}
 			}
 		}
-//		GPIOC->BSRR |= 0x20000000;
-//		GPIOC->BSRR |= 0x2000;
+		GPIOC->BSRR |= 0x20000000;
+		GPIOC->BSRR |= 0x2000;
 	}
 }
 

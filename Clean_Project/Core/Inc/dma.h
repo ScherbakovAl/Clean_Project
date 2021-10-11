@@ -16,10 +16,11 @@
 
 void DMA1_Channel3_IRQHandler();
 
-void InitDma(uint8_t * buf, bool* upd_flag);
+//void InitDma(uint8_t * buf, bool* upd_flag);
 
+void InitDma(uint8_t * buf);
 
-
+bool IsDataReady(void);
 
 
 

@@ -1,7 +1,6 @@
-usbd_midi_if.c:40:6:USBD_AddNoteOn	32	static
+usbd_midi_if.c:153:17:MIDI_DataRx	0	static
+usbd_midi_if.c:40:6:USBD_AddNoteOn	24	static
 usbd_midi_if.c:53:6:USBD_AddNoteOff	24	static
-usbd_midi_if.c:66:6:USBD_AddSysExMessage	24	static
-usbd_midi_if.c:113:6:USBD_SendMidiMessages	8	static
-usbd_midi_if.c:129:6:OTG_FS_IRQHandler	8	static
-usbd_midi_if.c:136:17:MIDI_DataTx	24	static
-usbd_midi_if.c:153:17:MIDI_DataRx	24	static
+usbd_midi_if.c:66:6:USBD_AddSysExMessage	56	static
+usbd_midi_if.c:113:6:USBD_SendMidiMessages	0	static
+usbd_midi_if.c:129:6:OTG_FS_IRQHandler	0	static
