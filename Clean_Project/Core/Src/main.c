@@ -1,4 +1,4 @@
-//hello!
+//hello2!
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_midi.h"

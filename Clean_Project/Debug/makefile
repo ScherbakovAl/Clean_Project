@@ -65,8 +65,8 @@ all: main-build
 main-build: Clean_Project.elf secondary-outputs
 
 # Tool invocations
-Clean_Project.elf: $(OBJS) $(USER_OBJS) /Users/aleksejserbakov/git/repository/Clean_Project/STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Clean_Project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/aleksejserbakov/git/repository/Clean_Project/STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Clean_Project.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Clean_Project.elf: $(OBJS) $(USER_OBJS) /Users/scherbakov.al/Documents/GitHub/Clean_Project/Clean_Project/STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Clean_Project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/scherbakov.al/Documents/GitHub/Clean_Project/Clean_Project/STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Clean_Project.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
