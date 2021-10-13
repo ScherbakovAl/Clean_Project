@@ -20,8 +20,7 @@ bool data_updated;
 
 uint32_t txx[88] = { };
 uint32_t tyy[88] = { };
-uint32_t tzz = 0;
-uint16_t speed_table[720] = { };
+uint8_t speed_table[180] = { };
 uint8_t on[88] = { };
 uint8_t key = 0;
 uint8_t key_dma[88][3] = { };
@@ -43,22 +42,20 @@ int main(void) {
 	delay_ms(1);
 
 	InitInterrupt();
-	//InitDma((uint8_t*) dma_buf, &data_updated);
 	InitDma((uint8_t*) dma_buf);
 	InitTim3();
 	InitTim2();
 
 	TurnLedOn();
 
-	for (uint16_t cu = 2; cu < 720; cu++) {
+	for (uint16_t cu = 1; cu < 180; cu++) {
 
 		// Curve: (polynomial fitting degree 2)
 		//	1		127
-		//	600		4
-		//	720		1
+		//	150		4
+		//	180		1
 
-		float m = (127.35583645435952 * pow(cu, 0)) - (0.35608727805498913 * pow(cu, 1))
-				+ (2.5082369544962051E-4 * pow(cu, 2));
+		float m = (128.43 * pow(cu, 0)) - (1.43 * pow(cu, 1)) + (0.00405 * pow(cu, 2));
 		speed_table[cu] = m;
 	}
 	speed_table[1] = 127;
@@ -78,74 +75,54 @@ int main(void) {
 
 	while (1) {
 
-//		if ((dma_buf[17] & (1<<0)) == 0) {
-//			GPIOC->BSRR |= 0x20000000;
-//		} else {
-//			GPIOC->BSRR |= 0x2000;
-//		}
-//
-//		if ((dma_buf[17] & (1<<1)) == 0) {
-//			GPIOC->BSRR |= 0x40000000;
-//		} else {
-//			GPIOC->BSRR |= 0x4000;
-//		}
-
-//		for (KEY = 0; KEY < 48; KEY++) {
-////			for (int i = 0; i < 8; i += 2) {
-//				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 1000
-//						&& on[KEY] == 0) {
-//					Txx[KEY] = sys_tick;
-//					on[KEY] = 1;
-//				}
-//
-//				if ((dma_buf[KEY] & (1 << 0)) == 0 && (dma_buf[KEY] & (1 << 1)) == 0 && (sys_tick - Txx[KEY]) > 1
-//						&& (sys_tick - Txx[KEY]) < 720 && on[KEY] == 1) {
-//					Tyy[KEY] = sys_tick;
-//					on[KEY] = 0;
-//					USBD_AddNoteOn(0, 1, KEY + 30, SPEEDTABLE[Tyy[KEY] - Txx[KEY]]);
-//					USBD_AddNoteOff(0, 1, KEY + 30);
-//					USBD_SendMidiMessages();
-//				}
-//
-//				if ((dma_buf[KEY] & (1 << 0)) != 0 && (dma_buf[KEY] & (1 << 1)) != 0 && (sys_tick - Tyy[KEY]) > 1000) {
-//					on[KEY] = 0;
-//				}
-////			}
-//		}
-
 //		// в key_dma	[]			[]
-//		//				нота
+//						нота
 //									номер dma_buf
 //									бит1
 //									бит2
+
+//		GPIOC->BSRR |= 0x20000000;
+//		GPIOC->BSRR |= 0x2000;
+
 		if (IsDataReady()) {
 			for (key = 0; key < 88; key++) {
+				if ((dma_buf[17] & 1 << 0) == 0) {
+					GPIOC->BSRR |= 0x20000000;
+				} else {
+					GPIOC->BSRR |= 0x2000;
+				}
+				if ((dma_buf[17] & 1 << 1) == 0) {
+					GPIOC->BSRR |= 0x40000000;
+				} else {
+					GPIOC->BSRR |= 0x4000;
+				}
+
+
 				if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][1]) == 0) {
 					if (on[key] == 0) {
-						if (sys_tick - tyy[key] > 1000) {
+						if ((sys_tick - tyy[key]) > 500) {
 							txx[key] = sys_tick;
 							on[key] = 1;
 						}
-					} else if ((dma_buf[key_dma[key][0]] & 4 << key_dma[key][2]) == 0) {
-						if (sys_tick - txx[key] > 1 && sys_tick - txx[key] < 720) {
+					} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
+						if ((sys_tick - txx[key]) > 1 && (sys_tick - txx[key]) < 180) {
 							tyy[key] = sys_tick;
 							USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
 							USBD_AddNoteOff(0, 1, key + 21);
 							USBD_SendMidiMessages();
 							on[key] = 0;
 						}
+
 					}
 				} else if (on[key] == 1) {
-					if (sys_tick - tyy[key] > 1000) {
+					if (sys_tick - tyy[key] > 500) {
 						on[key] = 0;
 					}
 				}
 			}
-		}
-		GPIOC->BSRR |= 0x20000000;
-		GPIOC->BSRR |= 0x2000;
-	}
-}
+		}			//if ready
+	}				//while
+}					//main
 
 void SystemClock_Config(void) {
 	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
@@ -178,65 +155,6 @@ void SystemClock_Config(void) {
 		Error_Handler();
 	}
 }
-
-//static void MX_TIM2_Init(void) {
-//
-//	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
-//	TIM_MasterConfigTypeDef sMasterConfig = { 0 };
-//
-//	htim2.Instance = TIM2;
-//	htim2.Init.Prescaler = 7199;
-//	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-//	htim2.Init.Period = 9999;
-//	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-//	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-//	if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
-//		Error_Handler();
-//	}
-//	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-//	if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK) {
-//		Error_Handler();
-//	}
-//	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-//	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-//	if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig)
-//			!= HAL_OK) {
-//		Error_Handler();
-//	}
-//}
-
-//static void MX_GPIO_Init(void) {
-//	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
-//
-//	__HAL_RCC_GPIOD_CLK_ENABLE();
-//	__HAL_RCC_GPIOA_CLK_ENABLE();
-//	__HAL_RCC_GPIOB_CLK_ENABLE();
-//
-//	HAL_GPIO_WritePin(GPIOA,
-//			GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4
-//					| GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
-//
-//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-//
-//	GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
-//			| GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
-//	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-//	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-//	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-//
-//	GPIO_InitStruct.Pin = GPIO_PIN_0;
-//	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-//	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-//	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-//
-//	GPIO_InitStruct.Pin = GPIO_PIN_9;
-//	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-//	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-//	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-//
-//}
 
 void Error_Handler(void) {
 	__disable_irq();

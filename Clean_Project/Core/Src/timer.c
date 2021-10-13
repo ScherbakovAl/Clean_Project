@@ -10,26 +10,25 @@ volatile uint32_t sys_tick = 0;
 // SysTick timer interrupt
 void SysTick_Handler()
 {
-    sys_tick++;         // every 1ms
+	sys_tick++;										// every 1ms
 }
 void InitSysTick(void)
 {
-    SysTick->LOAD = SYS_TIMER_TICK;
-    SysTick->VAL = 0;
-    SysTick->CTRL =	SysTick_CTRL_CLKSOURCE_Msk |
-                    SysTick_CTRL_TICKINT_Msk   |    // interrupt enable
-                    SysTick_CTRL_ENABLE_Msk;
+	SysTick->LOAD = SYS_TIMER_TICK;
+	SysTick->VAL = 0;
+	SysTick->CTRL =	SysTick_CTRL_CLKSOURCE_Msk |
+	SysTick_CTRL_TICKINT_Msk	|					// interrupt enable
+	SysTick_CTRL_ENABLE_Msk;
 }
 // Proceed SysTick value and reset counter
 bool IfDelayPassed(uint32_t* cnt, uint32_t delay_ms)
 {
-    if ((sys_tick - *cnt) > delay_ms) {
-        
-        *cnt = sys_tick;
-        return true;
-    }
-    else
-        return false;
+	if ((sys_tick - *cnt) > delay_ms) {
+		*cnt = sys_tick;
+		return true;
+	}
+	else
+		return false;
 }
 // Reset counter
 void ResetCounter(uint32_t* cnt)
@@ -38,19 +37,19 @@ void ResetCounter(uint32_t* cnt)
 }
 void InitTim2(void)
 {
-    // Timer
-    TIM2->CR1 = TIM_CR1_ARPE    * 0 |   // Auto-reload preload enable
-                TIM_CR1_CMS_1   * 0 |   // Center-aligned mode selection : edge-aligned mode
-                TIM_CR1_CMS_0   * 0 |
-                TIM_CR1_DIR     * 0;    // Direction : upcounter
-    TIM2->PSC = 35;                     // CK_CNT = 2MHz
-    TIM2->ARR = PHASE_PULSE - 1;        // 16us period
-    TIM2->EGR = TIM_EGR_UG;             // update event enable
-    // DMA
-    //TIM2->DIER  |= TIM_DIER_UDE;        // update DMA request enable
-    // PWM
-    TIM2->CCMR2 =   TIM_CCMR2_OC3M_2    * 1 |   // C3 PWM mode 2 (inactive -> active)
-                    TIM_CCMR2_OC3M_1    * 1 |
+	// Timer
+	TIM2->CR1 = TIM_CR1_ARPE	* 0 |	// Auto-reload preload enable
+				TIM_CR1_CMS_1	* 0 |	// Center-aligned mode selection : edge-aligned mode
+				TIM_CR1_CMS_0	* 0 |
+				TIM_CR1_DIR		* 0;	// Direction : upcounter
+	TIM2->PSC = 35;                     // CK_CNT = 2MHz
+	TIM2->ARR = PHASE_PULSE - 1;        // 16us period
+	TIM2->EGR = TIM_EGR_UG;             // update event enable
+	// DMA
+	//TIM2->DIER  |= TIM_DIER_UDE;        // update DMA request enable
+	// PWM
+	TIM2->CCMR2 =	TIM_CCMR2_OC3M_2	* 1 |   // C3 PWM mode 2 (inactive -> active)
+					TIM_CCMR2_OC3M_1	* 1 |
                     TIM_CCMR2_OC3M_0    * 1 |
                     TIM_CCMR2_OC4M_2    * 1 |   // C4 PWM mode 2 (inactive -> active)
                     TIM_CCMR2_OC4M_1    * 1 |

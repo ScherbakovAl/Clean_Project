@@ -14,15 +14,12 @@
 #ifndef __DMA_H__
 #define __DMA_H__
 
-void DMA1_Channel3_IRQHandler();
 
-//void InitDma(uint8_t * buf, bool* upd_flag);
-
+// buf is a pointer to the buffer to copy received data
 void InitDma(uint8_t * buf);
 
+// function to check if data were copyed to the buffer and reset flag
 bool IsDataReady(void);
-
-
 
 
 #endif

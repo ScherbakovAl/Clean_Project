@@ -51,9 +51,20 @@ void InitGpio(void)
 
     SetGpioMode(GPIOA, 0, PIN_MODE_IPULL);
     SetGpioMode(GPIOA, 1, PIN_MODE_IPULL);
+    SetGpioMode(GPIOA, 2, PIN_MODE_IPULL);
+    SetGpioMode(GPIOA, 3, PIN_MODE_IPULL);
+    SetGpioMode(GPIOA, 4, PIN_MODE_IPULL);
+    SetGpioMode(GPIOA, 5, PIN_MODE_IPULL);
+    SetGpioMode(GPIOA, 6, PIN_MODE_IPULL);
+    SetGpioMode(GPIOA, 7, PIN_MODE_IPULL);
     SetPin(GPIOA, 0);
     SetPin(GPIOA, 1);
-
+    SetPin(GPIOA, 2);
+    SetPin(GPIOA, 3);
+    SetPin(GPIOA, 4);
+    SetPin(GPIOA, 5);
+    SetPin(GPIOA, 6);
+    SetPin(GPIOA, 7);
 
     // Debug LED
     SetGpioMode(LED_PIN, PIN_MODE_10MHZ_OPP);

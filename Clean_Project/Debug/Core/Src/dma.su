@@ -1,3 +1,3 @@
-dma.c:95:6:DMA1_Channel3_IRQHandler	4	static
-dma.c:110:6:InitDma	8	static
-dma.c:140:6:IsDataReady	0	static
+dma.c:25:6:DMA1_Channel3_IRQHandler	12	static
+dma.c:37:6:InitDma	8	static
+dma.c:67:6:IsDataReady	0	static
