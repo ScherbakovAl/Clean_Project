@@ -83,21 +83,11 @@ int main(void) {
 
 //		GPIOC->BSRR |= 0x20000000;
 //		GPIOC->BSRR |= 0x2000;
+//		GPIOC->BSRR |= 0x40000000;
+//		GPIOC->BSRR |= 0x4000;
 
 		if (IsDataReady()) {
 			for (key = 0; key < 88; key++) {
-
-//				if ((dma_buf[17] & 1 << 0) == 0) {
-//					GPIOC->BSRR |= 0x20000000;
-//				} else {
-//					GPIOC->BSRR |= 0x2000;
-//				}
-//				if ((dma_buf[17] & 1 << 1) == 0) {
-//					GPIOC->BSRR |= 0x40000000;
-//				} else {
-//					GPIOC->BSRR |= 0x4000;
-//				}
-
 				if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][1]) == 0) {
 					if (on[key] == 0) {
 						if ((sys_tick - tyy[key]) > 200) {
@@ -121,7 +111,7 @@ int main(void) {
 						on[key] = 0;
 					}
 				}
-			}
+			}		//for
 		}			//if ready
 	}				//while
 }					//main
