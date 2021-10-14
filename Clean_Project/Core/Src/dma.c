@@ -29,7 +29,7 @@ void DMA1_Channel3_IRQHandler()
 
     // Return data
     for (int i = 0; i < DMA_NUM_OF_TRANSACTIONS; i++) {
-        buf_ptr[i] = tmp_buf[i];
+    	buf_ptr[i] = tmp_buf[i];
     }
     data_ready_flag = true;
 
@@ -64,7 +64,7 @@ void InitDma(uint8_t * buf)
 }
 
 // function to check if data were copied to the buffer and reset flag
-bool IsDataReady(void)
+volatile bool IsDataReady(void)
 {
     if (data_ready_flag == true) {
 
