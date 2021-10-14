@@ -87,7 +87,6 @@ int main(void) {
 		if (IsDataReady()) {
 			for (key = 0; key < 88; key++) {
 
-
 //				if ((dma_buf[17] & 1 << 0) == 0) {
 //					GPIOC->BSRR |= 0x20000000;
 //				} else {
@@ -99,25 +98,26 @@ int main(void) {
 //					GPIOC->BSRR |= 0x4000;
 //				}
 
-
 				if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][1]) == 0) {
 					if (on[key] == 0) {
-						if ((sys_tick - tyy[key]) > 500) {
+						if ((sys_tick - tyy[key]) > 200) {
 							txx[key] = sys_tick;
 							on[key] = 1;
 						}
 					} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
-						if ((sys_tick - txx[key]) > 1 && (sys_tick - txx[key]) < 180) {
-							tyy[key] = sys_tick;
-							USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
-							USBD_AddNoteOff(0, 1, key + 21);
-							USBD_SendMidiMessages();
-							on[key] = 0;
-						}
+						if (on[key] == 1) {
+							if ((sys_tick - txx[key]) > 1 && (sys_tick - txx[key]) < 180) {
+								tyy[key] = sys_tick;
+								USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
+								USBD_AddNoteOff(0, 1, key + 21);
+								USBD_SendMidiMessages();
+								on[key] = 2;
+							}
 
+						}
 					}
-				} else if (on[key] == 1) {
-					if (sys_tick - tyy[key] > 500) {
+				} else if (on[key] != 0) {
+					if (sys_tick - tyy[key] > 200) {
 						on[key] = 0;
 					}
 				}
