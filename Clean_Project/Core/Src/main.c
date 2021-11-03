@@ -50,15 +50,40 @@ int main(void) {
 
 	for (uint16_t cu = 1; cu < 180; cu++) {
 
-		// Curve: (polynomial fitting degree 2)
-		//	1		127
-		//	150		4
+		// Curve: (polynomial fitting degree 3)
 		//	180		1
+		//	165		17
+		//	15		110
+		//	1		127
 
-		float m = (128.43 * pow(cu, 0)) - (1.43 * pow(cu, 1)) + (0.00405 * pow(cu, 2));
+/*
+ *
+#define VEL_MAP_LENGTH 12187
+#define VEL_DISTANCE_FACTOR 1500.0
+#define VEL_LOG_MULTIPLIER 100.0
+#define VEL_ADDITION 57.96
+#define VELOCITY_MAP_STRETCH 0.4
+*/
+
+/*
+ *  for (int i = 0; i < VEL_MAP_LENGTH; i++) {
+
+      double d = VEL_LOG_MULTIPLIER * log(VEL_DISTANCE_FACTOR / i) / log(10.0);
+      v = multiplier * (VEL_ADDITION + d);
+
+      velocityMap[j][i] = (byte) v;
+    }
+ */
+
+
+//		float m = (128.356 * pow(cu, 0)) - (1.366 * pow(cu, 1))
+//				+ (0.01 * pow(cu, 2)) - (3.537E-5 * pow(cu, 3));
+
+		float m = -3.073 * cu + 130.073;
 		speed_table[cu] = m;
 	}
 	speed_table[1] = 127;
+
 
 	int bi = 0;
 	for (uint8_t ke = 0; ke < 88; ke++) {
@@ -96,10 +121,9 @@ int main(void) {
 						}
 					} else if ((dma_buf[key_dma[key][0]] & 1 << key_dma[key][2]) == 0) {
 						if (on[key] == 1) {
-							if ((sys_tick - txx[key]) > 1 && (sys_tick - txx[key]) < 180) {
+							if ((sys_tick - txx[key]) >= 1 && (sys_tick - txx[key]) < 180) {
 								tyy[key] = sys_tick;
-								USBD_AddNoteOn(0, 1, key + 21, speed_table[tyy[key] - txx[key]]);
-								USBD_AddNoteOff(0, 1, key + 21);
+								USBD_AddNoteOn(0, 1, key, speed_table[(tyy[key] - txx[key])]);
 								USBD_SendMidiMessages();
 								on[key] = 2;
 							}
@@ -109,6 +133,9 @@ int main(void) {
 				} else if (on[key] != 0) {
 					if (sys_tick - tyy[key] > 200) {
 						on[key] = 0;
+						USBD_AddNoteOff(0, 1, key);
+						USBD_SendMidiMessages();
+
 					}
 				}
 			}		//for
